@@ -1,6 +1,7 @@
 package com.hcd.recordfilterstrategy.config;
 
 import com.hcd.recordfilterstrategy.domain.Hero;
+import com.hcd.recordfilterstrategy.listener.HeroFilterStrategy;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -50,6 +51,7 @@ public class KafkaConfig {
 
         ConcurrentKafkaListenerContainerFactory<String, Hero> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(defaultFactory);
+        factory.setRecordFilterStrategy(new HeroFilterStrategy());
         factory.setCommonErrorHandler(new DefaultErrorHandler());
         return factory;
     }

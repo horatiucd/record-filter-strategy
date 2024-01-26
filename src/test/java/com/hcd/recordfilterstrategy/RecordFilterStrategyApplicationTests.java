@@ -25,9 +25,17 @@ class RecordFilterStrategyApplicationTests {
         "}";
 
     @Test
-    void send_acceptable_hero() {
+    void send_good_hero() {
         final String hero = String.format(template,
                 UUID.randomUUID(), Hero.CharacterType.GOOD, "Spiderman");
+
+        kafkaTemplate.send(topic, hero);
+    }
+
+    @Test
+    void send_evil_hero() {
+        final String hero = String.format(template,
+                UUID.randomUUID(), Hero.CharacterType.EVIL, "Green Goblin");
 
         kafkaTemplate.send(topic, hero);
     }

@@ -14,6 +14,6 @@ public class HeroListener {
 
     @KafkaListener(topics = "${topic.hero}", groupId = "${topic.hero.group.id}")
     public void onReceive(@Payload Hero hero) {
-        LOG.info("A new hero was born - {}.", hero);
+        LOG.info("{} is welcomed in our world.", hero);
     }
 }
