@@ -1,10 +1,9 @@
 package com.hcd.recordfilterstrategy.domain;
 
-public record Request(String id,
-                      String contextId,
-                      Type type) {
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.hcd.recordfilterstrategy.domain.deserialization.CustomRequestDeserializer;
 
-    public enum Type {
-        JOKE, POEM, STORY, SONG
-    }
+@JsonDeserialize(using = CustomRequestDeserializer.class)
+public record Request(String id,
+                      String contextId) {
 }

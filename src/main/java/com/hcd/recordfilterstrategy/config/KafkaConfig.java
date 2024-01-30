@@ -2,6 +2,7 @@ package com.hcd.recordfilterstrategy.config;
 
 import com.hcd.recordfilterstrategy.domain.Request;
 import com.hcd.recordfilterstrategy.listener.CustomRecordFilterStrategy;
+import com.hcd.recordfilterstrategy.domain.deserialization.FailedRequestDeserializationFunction;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -16,6 +17,7 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.listener.DefaultErrorHandler;
+import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 import java.util.HashMap;
@@ -32,7 +34,8 @@ public class KafkaConfig {
     private String groupId;
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, Request> kafkaListenerContainerFactory(CustomRecordFilterStrategy recordFilterStrategy) {
+    public ConcurrentKafkaListenerContainerFactory<String, Request> kafkaListenerContainerFactory(CustomRecordFilterStrategy recordFilterStrategy,
+                                                                                                  FailedRequestDeserializationFunction failedDeserializationFunction) {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerUrl);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
@@ -41,8 +44,13 @@ public class KafkaConfig {
         props.put(JsonDeserializer.TRUSTED_PACKAGES, Request.class.getPackageName());
         props.put(JsonDeserializer.VALUE_DEFAULT_TYPE, Request.class.getName());
 
+        JsonDeserializer<Request> jsonDeserializer = new JsonDeserializer<>(Request.class);
+
+        ErrorHandlingDeserializer<Request> valueDeserializer = new ErrorHandlingDeserializer<>(jsonDeserializer);
+        valueDeserializer.setFailedDeserializationFunction(failedDeserializationFunction);
+
         DefaultKafkaConsumerFactory<String, Request> defaultFactory = new DefaultKafkaConsumerFactory<>(props,
-                new StringDeserializer(), new JsonDeserializer<>(Request.class));
+                new StringDeserializer(), valueDeserializer);
 
         ConcurrentKafkaListenerContainerFactory<String, Request> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(defaultFactory);

@@ -23,6 +23,6 @@ public class RequestMessageListener {
     public void onMessage(@Payload Request request) {
         LOG.info("Processing {}.", request);
 
-        responseService.send(Response.successFor(request.id()));
+        responseService.send(Response.success());
     }
 }
