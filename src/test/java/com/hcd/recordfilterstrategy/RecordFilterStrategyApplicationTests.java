@@ -1,6 +1,6 @@
 package com.hcd.recordfilterstrategy;
 
-import com.hcd.recordfilterstrategy.domain.Hero;
+import com.hcd.recordfilterstrategy.domain.Request.Type;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,29 +15,27 @@ class RecordFilterStrategyApplicationTests {
     @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;
 
-    @Value("${topic.hero}")
+    @Value("${topic.request}")
     private String topic;
+
+    @Value("${context.id}")
+    private String contextId;
 
     private static final String template = "{" +
             "\"id\":\"%s\"," +
-            "\"type\":\"%s\"," +
-            "\"name\":\"%s\"" +
+            "\"contextId\":\"%s\"," +
+            "\"type\":\"%s\"" +
         "}";
 
     @Test
-    void send_good_hero() {
-        final String hero = String.format(template,
-                UUID.randomUUID(), Hero.CharacterType.GOOD, "Spiderman");
-
-        kafkaTemplate.send(topic, hero);
+    void compliant() {
+        kafkaTemplate.send(topic,
+                String.format(template, UUID.randomUUID(), contextId, Type.JOKE));
     }
 
     @Test
-    void send_evil_hero() {
-        final String hero = String.format(template,
-                UUID.randomUUID(), Hero.CharacterType.EVIL, "Green Goblin");
-
-        kafkaTemplate.send(topic, hero);
+    void notCompliant() {
+        kafkaTemplate.send(topic,
+                String.format(template, UUID.randomUUID(), "other context", Type.POEM));
     }
-
 }
