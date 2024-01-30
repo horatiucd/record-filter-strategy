@@ -24,7 +24,7 @@ public class CustomRequestDeserializer extends StdDeserializer<Request> {
 
         final String id = deserializeField(root, "id");
         if (id == null || id.isEmpty()) {
-            throw new RequestDeserializationException("'id' is required");
+            throw new RequestDeserializationException(contextId, "'id' is required");
         }
         return new Request(id, contextId);
     }

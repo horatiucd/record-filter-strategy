@@ -2,6 +2,7 @@ package com.hcd.recordfilterstrategy.domain.deserialization;
 
 import com.hcd.recordfilterstrategy.domain.Request;
 import com.hcd.recordfilterstrategy.domain.Response;
+import com.hcd.recordfilterstrategy.listener.RequestFilterStrategy;
 import com.hcd.recordfilterstrategy.listener.ResponseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,9 +16,12 @@ public class FailedRequestDeserializationFunction implements Function<FailedDese
 
     private static final Logger LOG = LoggerFactory.getLogger(FailedRequestDeserializationFunction.class);
 
+    private final RequestFilterStrategy requestFilterStrategy;
     private final ResponseService responseService;
 
-    public FailedRequestDeserializationFunction(ResponseService responseService) {
+    public FailedRequestDeserializationFunction(RequestFilterStrategy requestFilterStrategy,
+                                                ResponseService responseService) {
+        this.requestFilterStrategy = requestFilterStrategy;
         this.responseService = responseService;
     }
 
@@ -28,8 +32,9 @@ public class FailedRequestDeserializationFunction implements Function<FailedDese
         if (ex instanceof RequestDeserializationException deserializationEx) {
             LOG.info("Error deserializing request - {}", deserializationEx.getMessage());
 
-            responseService.send(Response.failure());
-
+            if (!requestFilterStrategy.filter(deserializationEx.getContextId())) {
+                responseService.send(Response.failure());
+            }
         } else {
             LOG.error("Unexpected error deserializing request.", ex);
         }
