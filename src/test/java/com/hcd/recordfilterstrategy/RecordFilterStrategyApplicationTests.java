@@ -1,6 +1,5 @@
 package com.hcd.recordfilterstrategy;
 
-import com.hcd.recordfilterstrategy.domain.Request.Type;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,21 +20,21 @@ class RecordFilterStrategyApplicationTests {
     @Value("${context.id}")
     private String contextId;
 
-    private static final String template = "{" +
-            "\"id\":\"%s\"," +
-            "\"contextId\":\"%s\"," +
-            "\"type\":\"%s\"" +
-        "}";
+    private static final String template = """
+        {
+            "id": "%s",
+            "contextId": "%s"
+        }""";
 
     @Test
     void compliant() {
         kafkaTemplate.send(topic,
-                String.format(template, UUID.randomUUID(), contextId, Type.JOKE));
+                String.format(template, UUID.randomUUID(), contextId));
     }
 
     @Test
     void notCompliant() {
         kafkaTemplate.send(topic,
-                String.format(template, UUID.randomUUID(), "other context", Type.POEM));
+                String.format(template, UUID.randomUUID(), "other context"));
     }
 }
